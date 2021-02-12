@@ -12,6 +12,7 @@
         <package android:name="com.glsecl.android.driver.qa" />
     </queries>
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -20,6 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SwitcherApp"
         tools:ignore="AllowBackup">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,6 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".FloatingIconService" />
+
     </application>
 
 </manifest>

@@ -3,7 +3,12 @@ package com.mohsenoid.switcherapp
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.text.method.ScrollingMovementMethod
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -16,7 +21,29 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.main_activity)
-        initUi()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideFloatingIcon()
+
+        // Check if the application has draw over other apps permission or not
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+
+            printLog("Allow ${getString(R.string.app_name)} to display over other apps...")
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                // Open the settings screen to grant the permission
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION)
+            }, 3000)
+        } else {
+            printLog("Permission to display over other apps is granted!")
+            initUi()
+        }
     }
 
     private fun initUi() {
@@ -58,7 +85,18 @@ class MainActivity : AppCompatActivity() {
 
         if (launchIntent != null) {
             startActivity(launchIntent)
+            showFloatingIcon()
         }
+    }
+
+    private fun showFloatingIcon() {
+        val intent = Intent(this, FloatingIconService::class.java)
+        startService(intent)
+    }
+
+    private fun hideFloatingIcon() {
+        val intent = Intent(this, FloatingIconService::class.java)
+        stopService(intent)
     }
 
     companion object {
@@ -67,5 +105,7 @@ class MainActivity : AppCompatActivity() {
             "com.glsecl.android.driver.debug",
             "com.glsecl.android.driver.qa",
         )
+
+        private const val CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084
     }
 }
